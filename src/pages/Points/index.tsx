@@ -1,7 +1,7 @@
 import React, { useState, useEffect} from 'react';
 import Constants from 'expo-constants';
 import { Feather as Icon } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { View, StyleSheet, Image, TouchableOpacity, Text, ScrollView, Alert } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { SvgUri } from 'react-native-svg';
@@ -15,12 +15,17 @@ interface Item {
   image_url: string;
 }
 
-interface Point{
+interface Point {
   id: number;
   name: string;
   image: string;
   latitude: number;
   longitude: number;
+}
+
+interface Route {
+  uf: string;
+  city: string;
 }
 
 const Points = () => {
@@ -29,6 +34,10 @@ const Points = () => {
     const [ selectedItems, setSelectedItems ] = useState<number[]>([]);
     const [ initialPosition, setInitialPosition ] = useState<[number, number]>([0, 0]);
     const navigation = useNavigation();
+
+    const route = useRoute();
+
+    const routeParams = route.params as Route;
 
     useEffect(() => {
       async function loadPosition(){
@@ -62,14 +71,14 @@ const Points = () => {
     useEffect(() => {
       api.get('points', {
         params: {
-          city: 'Montes Claros',
-          uf: 'MG',
-          items: [3,4]
+          city: routeParams.city,
+          uf: routeParams.uf,
+          items: selectedItems
         }
       }).then(response => {
         setPoints(response.data); 
       })
-    }, []);
+    }, [selectedItems]);
 
     function handleNavigateBack(){
         navigation.goBack();
